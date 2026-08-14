@@ -259,6 +259,8 @@ class _ConnectionPageState extends State<ConnectionPage>
     if (eventName == 'minimize') {
       isWindowMinimized = true;
       windowManager.hide();
+      // Native Win32 hide fallback (mainOnMainWindowClose hides via FindWindowW+ShowWindow)
+      bind.mainOnMainWindowClose();
     } else if (eventName == 'maximize' || eventName == 'restore') {
       if (isWindowMinimized && isWindows) {
         // windows can't update when minimized.

@@ -186,20 +186,24 @@ jobs:
           name: topmostwindow-artifacts-x64
           path: "./rustdesk"
 
-      - name: Package portable zip
+      - name: Build single portable exe
         shell: bash
         run: |
-          cd rustdesk
-          # Create a portable zip of the entire folder
-          7z a -tzip ../rustdesk-${{ env.VERSION }}-windows-x64-portable.zip *
-          cd ..
-          ls -lh rustdesk-*.zip
+          # Run portable packer: compresses all files into data.bin,
+          # builds rustdesk-portable-packer crate → single self-extracting exe
+          cd libs/portable
+          pip3 install -r requirements.txt
+          python3 ./generate.py -f ../../rustdesk -o . -e ../../rustdesk/rustdesk.exe
+          cd ../..
+          # Rename to clear portable name
+          mv ./target/release/rustdesk-portable-packer.exe ./rustdesk-${{ env.VERSION }}-windows-x64-portable.exe
+          ls -lh rustdesk-*.exe
 
-      - name: Upload portable artifact
+      - name: Upload portable exe
         uses: actions/upload-artifact@v4
         with:
           name: rustdesk-windows-x64-portable
-          path: rustdesk-*.zip
+          path: rustdesk-*.exe
           retention-days: 30
 
       - name: Upload to release (on tag push only)
@@ -207,4 +211,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
-          files: rustdesk-*.zip
+          files: rustdesk-*.exe

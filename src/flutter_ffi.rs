@@ -2405,7 +2405,26 @@ pub fn main_account_auth_result() -> String {
 pub fn main_on_main_window_close() {
     // may called more than one times
     #[cfg(windows)]
-    crate::portable_service::client::drop_portable_service_shared_memory();
+    {
+        crate::portable_service::client::drop_portable_service_shared_memory();
+        // Hide main window to tray via direct Win32 call.
+        // More reliable than windowManager.hide() platform channel.
+        hide_main_window_to_tray();
+    }
+}
+
+#[cfg(windows)]
+fn hide_main_window_to_tray() {
+    use crate::platform::{wide_string, FLUTTER_RUNNER_WIN32_WINDOW_CLASS};
+    use winapi::um::winuser::{FindWindowW, ShowWindow, SW_HIDE};
+    unsafe {
+        let class_name = wide_string(FLUTTER_RUNNER_WIN32_WINDOW_CLASS);
+        let window_name = wide_string(&crate::get_app_name());
+        let hwnd = FindWindowW(class_name.as_ptr(), window_name.as_ptr());
+        if !hwnd.is_null() {
+            ShowWindow(hwnd, SW_HIDE);
+        }
+    }
 }
 
 pub fn main_current_is_wayland() -> SyncReturn<bool> {
