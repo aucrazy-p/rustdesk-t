@@ -170,6 +170,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   if (!window.CreateAndShow(window_title, origin, size, !is_cm_page)) {
       return EXIT_FAILURE;
   }
+  // CM window: never visible. The window is created without WS_VISIBLE,
+  // but we hide it explicitly to prevent any flash before Flutter starts.
+  if (is_cm_page) {
+      HWND cm_hwnd = window.GetHandle();
+      if (cm_hwnd) {
+          ::ShowWindow(cm_hwnd, SW_HIDE);
+      }
+  }
   window.SetQuitOnClose(true);
 
   ::MSG msg;

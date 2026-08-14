@@ -109,6 +109,12 @@ Future<void> main(List<String> args) async {
     debugPrint("--cm started");
     desktopType = DesktopType.cm;
     await windowManager.ensureInitialized();
+    // Never show the CM window: set opacity to 0 and hide immediately,
+    // before Flutter starts rendering, to prevent any flash.
+    if (kForceHideCm) {
+      windowManager.setOpacity(0);
+      await windowManager.hide();
+    }
     runConnectionManagerScreen();
   } else if (args.contains('--install')) {
     runInstallPage();
@@ -295,11 +301,18 @@ void runConnectionManagerScreen() async {
     const DesktopServerPage(),
     MyTheme.currentThemeMode(),
   );
-  // Force hide CM window: always hide on startup, never show.
-  // The CM process still handles incoming connections via IPC, but no window
-  // is displayed to the user.
   gFFI.serverModel.hideCm = true;
-  await hideCmWindow(isStartup: true);
+  if (kForceHideCm) {
+    // Configure window options but never call show().
+    // The window stays invisible for the entire process lifetime.
+    WindowOptions windowOptions = getHiddenTitleBarWindowOptions(
+        size: kConnectionManagerWindowSizeClosedChat);
+    await windowManager.waitUntilReadyToShow(windowOptions, null);
+    bind.mainHideDock();
+    await windowManager.hide();
+  } else {
+    await hideCmWindow(isStartup: true);
+  }
   setResizable(false);
   // Start the uni links handler and redirect links to Native, not for Flutter.
   listenUniLinks(handleByFlutter: false);
