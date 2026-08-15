@@ -9,6 +9,7 @@ on:
     paths:
       - "src/**"
       - "flutter/lib/**"
+      - "libs/portable/**"
       - "Cargo.toml"
       - "Cargo.lock"
       - "build.py"
@@ -22,6 +23,10 @@ env:
   VCPKG_COMMIT_ID: "120deac3062162151622ca4860575a33844ba10b"
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
   VERSION: "1.4.9"
+
+concurrency:
+  group: windows-portable-build
+  cancel-in-progress: true
 
 jobs:
   # Step 1: Generate flutter-rust-bridge files (they are git-ignored, not committed)
