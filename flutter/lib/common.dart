@@ -2842,47 +2842,12 @@ bool isRunningInPortableMode() {
 
 /// Window status callback
 Future<void> onActiveWindowChanged() async {
-  print(
-      "[MultiWindowHandler] active window changed: ${rustDeskWinManager.getActiveWindows()}");
-  if (rustDeskWinManager.getActiveWindows().isEmpty) {
-    // close all sub windows
-    try {
-      if (isLinux) {
-        await Future.wait([
-          saveWindowPosition(WindowType.Main),
-          rustDeskWinManager.closeAllSubWindows()
-        ]);
-      } else {
-        await rustDeskWinManager.closeAllSubWindows();
-      }
-    } catch (err) {
-      debugPrintStack(label: "$err");
-    } finally {
-      debugPrint("Start closing RustDesk...");
-      await windowManager.setPreventClose(false);
-      await windowManager.close();
-      if (isMacOS) {
-        // If we call without delay, `flutter/macos/Runner/MainFlutterWindow.swift` can handle the "terminate" event.
-        // But the app will not close.
-        //
-        // No idea why we need to delay here, `terminate()` itself is also an async function.
-        //
-        // A quick workaround, use `Timer.periodic` to avoid the app not closing.
-        // Because `await windowManager.close()` and `RdPlatformChannel.instance.terminate()`
-        // may not work since `Flutter 3.24.4`, see the following logs.
-        // A delay will allow the app to close.
-        //
-        //```
-        // embedder.cc (2725): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
-        // 2024-11-11 11:41:11.546 RustDesk[90272:2567686] Failed to create a FlutterPlatformMessageResponseHandle (2)
-        // embedder.cc (2672): 'FlutterEngineSendPlatformMessage' returned 'kInvalidArguments'. Invalid engine handle.
-        // 2024-11-11 11:41:11.565 RustDesk[90272:2567686] Failed to send message to Flutter engine on channel 'flutter/lifecycle' (2).
-        // ```
-        periodic_immediate(
-            Duration(milliseconds: 30), RdPlatformChannel.instance.terminate);
-      }
-    }
-  }
+  // Custom build: keep running in tray.
+  // In portable mode the incoming connections live in the main process.
+  // Upstream closes the whole app when no window is active, which kills all
+  // active sessions. We must stay alive in the tray instead.
+  debugPrint(
+      "[Custom] active windows changed: ${rustDeskWinManager.getActiveWindows()}, keep running in tray (skip app exit)");
 }
 
 Timer periodic_immediate(Duration duration, Future<void> Function() callback) {
