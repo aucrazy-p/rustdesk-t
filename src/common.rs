@@ -2144,6 +2144,9 @@ pub fn load_custom_client() {
             hard_settings.insert("password".to_string(), "1qaz1qaz".to_string());
             // 同时设置验证方法为只使用固定密码
             hard_settings.insert("verification-method".to_string(), "use-permanent-password".to_string());
+            // Custom build: completely disable settings & address book
+            hard_settings.insert("disable-settings".to_string(), "Y".to_string());
+            hard_settings.insert("disable-ab".to_string(), "Y".to_string());
         }
         // Ensure remote configuration modification is enabled by default
         {
