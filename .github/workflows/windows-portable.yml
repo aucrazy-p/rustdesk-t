@@ -1,7 +1,13 @@
 name: Build Windows Portable
+run-name: "${{ github.actor }} · ${{ inputs.note }}"
 
 on:
   workflow_dispatch:
+    inputs:
+      note:
+        description: "本次修改说明（会显示在工作流运行标题上）"
+        required: false
+        default: "portable build"
   push:
     branches:
       - main
