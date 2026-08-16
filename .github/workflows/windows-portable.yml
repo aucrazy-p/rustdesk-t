@@ -8,19 +8,6 @@ on:
         description: "本次修改说明（会显示在工作流运行标题上）"
         required: false
         default: "portable build"
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - "src/**"
-      - "flutter/lib/**"
-      - "libs/portable/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "build.py"
-      - "vcpkg.json"
-      - ".github/workflows/windows-portable.yml"
 
 env:
   RUST_VERSION: "1.75"
