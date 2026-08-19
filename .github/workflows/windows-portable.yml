@@ -8,6 +8,12 @@ on:
         description: "本次修改说明（会显示在工作流运行标题上）"
         required: false
         default: "portable build"
+      server:
+        description: "内置的 Rendezvous 服务器地址（必填，编译期由环境变量注入，不写死在仓库）"
+        required: true
+      key:
+        description: "内置的 RS_PUB_KEY（必填，编译期由环境变量注入，不写死在仓库）"
+        required: true
 
 env:
   RUST_VERSION: "1.75"
@@ -126,6 +132,9 @@ jobs:
           head -n 100 "${VCPKG_ROOT}/buildtrees/ffmpeg/build-x64-windows-static-rel-out.log" || true
 
       - name: Build rustdesk
+        env:
+          HBB_RENDEZVOUS_SERVERS: ${{ inputs.server }}
+          HBB_RS_PUB_KEY: ${{ inputs.key }}
         run: |
           # Build RustDesk portable (x64) with hwcodec and vram
           python3 .\build.py --portable --flutter --skip-portable-pack --hwcodec --vram

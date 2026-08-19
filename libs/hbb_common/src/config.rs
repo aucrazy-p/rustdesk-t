@@ -117,8 +117,16 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["139.155.137.143"];
-pub const RS_PUB_KEY: &str = "vsyVQD1AFPNoPUUK9aGziBXMJ37+DID5HvY8eoP7tBU=";
+// Values are injected at compile time via HBB_RENDEZVOUS_SERVERS / HBB_RS_PUB_KEY
+// (the server/key inputs of the Build Windows Portable workflow). Not hardcoded here.
+pub const RENDEZVOUS_SERVERS: &[&str] = match option_env!("HBB_RENDEZVOUS_SERVERS") {
+    Some(s) => &[s],
+    None => &[],
+};
+pub const RS_PUB_KEY: &str = match option_env!("HBB_RS_PUB_KEY") {
+    Some(k) => k,
+    None => "",
+};
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
 pub const RELAY_PORT: i32 = 21117;
